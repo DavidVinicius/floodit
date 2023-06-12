@@ -8,11 +8,6 @@ class Greed():
         #     return children[0][1] # retorna o FC topo da lista ou seja a nova cor 
         # else:
         #board.colorNeighbor()
-        if board.quantityColors() < board.COLOR_K // 2:
-            print('Q')
-            children = list(sorted(board.children(), key=lambda x: x[0].scoree())) # classifica a lista conforme o score len(self.GROUPS)        
-        else:
-            print('S')
-            children = list(sorted(board.children(), key=lambda x: x[0].score())) # classifica a lista conforme o score len(self.GROUPS)        
+        children = list(sorted(board.children(), key=lambda x: x[0].score())) # classifica a lista conforme o score len(self.GROUPS)        
 
         return children[0][1] # retorna o FC topo da lista ou seja a nova cor 

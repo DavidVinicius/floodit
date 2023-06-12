@@ -13,12 +13,13 @@ class Board(object):
 
     COLORNEIGHBOR = ""
     COLOR_K = 0
+    LAST_MOVE = None
 
     def __init__(self, orig=None, size=10, color=4, line=10, board=[]):
 
 
         self.COLOR_K = color
-        
+
         if orig:
             self.COLORS = copy.deepcopy(orig.COLORS)
             self.size = orig.size
@@ -107,6 +108,7 @@ class Board(object):
     def move(self, c):
         self.FC = c
         self.COLORNEIGHBOR = ""
+        self.LAST_MOVE = c
         for coor in self.FLOODED:
             x, y = coor
             self.board[x][y] = c
@@ -163,6 +165,9 @@ class Board(object):
     def quantityColors(self):
         cores = list(map(lambda x: x[0], self.GROUPS))
         return len(set(cores))
+    def colorsInBoard(self):
+        cores = list(set(map(lambda x: x[0], self.GROUPS)).difference(('' if not None else self.LAST_MOVE)))
+        return cores
       
 #---------------------------------------------
     def nearcenter(self):
@@ -193,7 +198,7 @@ class Board(object):
     def children(self):
         children = []
         #self.COLORNEIGHBOR
-        for c in self.COLORS: # : para cada cor 
+        for c in self.colorsInBoard(): # : para cada cor 
             if c != self.FC: # se a cor for dirente da atual 
                 child = Board(orig=self) # gera um tabuleiro com o cenário atual
                 child.move(c) # troca a cor atual pela nova cor

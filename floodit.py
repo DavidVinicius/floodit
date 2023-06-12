@@ -11,7 +11,8 @@ for i in range(n):
     estadoInicial.append(linhaMatriz)
 
 b = Board(line=n, size=m, color=k, board=estadoInicial)
-print(b.quantityColors())
+print(b.colorsInBoard())
+#exit()
 b.print();
 print(b.COLOR_K)
 
