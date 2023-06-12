@@ -12,10 +12,13 @@ class Board(object):
     COLORS = list(map(str, range(1,21))) # "0123456789" # to-do pensar no cenário de 20 cores 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
 
     COLORNEIGHBOR = ""
+    COLOR_K = 0
 
     def __init__(self, orig=None, size=10, color=4, line=10, board=[]):
 
 
+        self.COLOR_K = color
+        
         if orig:
             self.COLORS = copy.deepcopy(orig.COLORS)
             self.size = orig.size
@@ -148,13 +151,18 @@ class Board(object):
 
     #A cor mais frequente na borda    
     def colorNeighborFreq(self):
-        groupOrd = list(sorted(self.GROUPS, key=lambda x: x[0]))
-        frequency = 0
-        colorCheck = ""
-
-        grupos = []
-        for chave, grupo in groupby(groupOrd, key=lambda x: x[0]):
-            grupos.append(list(grupo))
+        cores = list(map(lambda x: (x[0], len(x[1])), self.GROUPS))        
+        coresDict = {}
+        maxValue = (0,0)
+        for cor, qtd in cores:
+            coresDict[cor] = coresDict.get(cor, 0) + qtd
+            if coresDict[cor] > maxValue[1]:
+                maxValue = (cor, coresDict[cor])
+        return maxValue[0]
+    
+    def quantityColors(self):
+        cores = list(map(lambda x: x[0], self.GROUPS))
+        return len(set(cores))
       
 #---------------------------------------------
     def nearcenter(self):

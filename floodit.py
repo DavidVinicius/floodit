@@ -11,9 +11,15 @@ for i in range(n):
     estadoInicial.append(linhaMatriz)
 
 b = Board(line=n, size=m, color=k, board=estadoInicial)
-b.print()
+print(b.quantityColors())
+b.print();
+print(b.COLOR_K)
+
+#b.print()
     
 p = Greed()
+
+moves = []
 
 while not b.isOver():
     i+=1
@@ -21,4 +27,8 @@ while not b.isOver():
     m = p.findMove(b)
     print(m)
     b.move(m)
-    b.print()
+    moves.append('a '+m)
+    #b.print()
+
+print(i)
+#print(*moves)
