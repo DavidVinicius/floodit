@@ -11,10 +11,10 @@ for i in range(n):
     estadoInicial.append(linhaMatriz)
 
 b = Board(line=n, size=m, color=k, board=estadoInicial)
-print(b.colorsInBoard())
+#print(b.colorsInBoard())
 #exit()
-b.print();
-print(b.COLOR_K)
+#b.print();
+#print(b.COLOR_K)
 
 #b.print()
     
@@ -26,10 +26,10 @@ while not b.isOver():
     i+=1
     print(i)
     m = p.findMove(b)
-    print(m)
+    #print(m)
     b.move(m)
     moves.append('a '+m)
     #b.print()
 
 print(i)
-#print(*moves)
+print(moves)
