@@ -30,6 +30,11 @@ class Board(object):
             self.FLOODED = copy.deepcopy(orig.FLOODED)
             self.GROUPS = copy.deepcopy(orig.GROUPS)
             self.COLORNEIGHBOR = []
+            self.H = []
+            self.COLORX = []
+            self.COLORY = []
+            self.COLORM = []
+            self.resetQTD = 0
         else:
             self.COLORS = self.COLORS[0:color]#random.sample(self.COLORS, k=color)
             self.size = size
@@ -40,19 +45,19 @@ class Board(object):
             self.FLOODED = []
             self.GROUPS = []
             self.COLORNEIGHBOR = []
-            self.reset()
+            self.H = []
+            self.COLORX = []
+            self.COLORY = []
+            self.COLORM = []
+            self.resetQTD = 0
+            #self.reset()
 
     # passo 1 - ler o arquivo do mapa e mapear quais os grupos iniciais 
     def reset(self):
-        for i in range(self.line): # linha
-            for j in range(self.column): # coluna
-                # get a random color
-                #tempc = self.COLORS[random.randrange(len(self.COLORS))]
-
-                # set the color for this block
-                #self.board[i][j] = tempc
-                temp_color = self.board[i][j]
-                self.GROUPS.append([temp_color, [(i, j)]])
+        #for i in range(self.line): # linha
+        #    for j in range(self.column): # coluna
+        #        temp_color = self.board[i][j]
+        #        self.GROUPS.append([temp_color, [(i, j)]])
 
 
         # grouping
@@ -90,6 +95,48 @@ class Board(object):
         self.FLOODED = self.GROUPS[0][1]
         del self.GROUPS[0]
 
+
+    def reset2(self):
+        #for i in range(self.line):
+        #    for j in range(self.column):
+        #        temp_color = self.board[i][j]
+        #        self.GROUPS.append([temp_color, [(i, j)]])
+
+        done = False
+
+        while not done:
+            done = True
+            for n, g in enumerate(self.GROUPS):
+                for coor in g[1]:
+                    x, y = coor
+                    if y > 0 or x > 0:
+                        for m, gg in enumerate(self.GROUPS):
+                            if n != m and g[0] == gg[0]:
+                                if (y > 0 and (x, y - 1) in gg[1]) or (x > 0 and (x - 1, y) in gg[1]):
+                                    if n < m:
+                                        tempg = g
+                                        tempg[1] += gg[1]
+                                        keep = n
+                                        dele = gg
+                                    if n > m:
+                                        tempg = gg
+                                        tempg[1] += g[1]
+                                        keep = m
+                                        dele = g
+                                    done = False
+                                    break
+                        if not done:
+                            break
+                if not done:
+                    break
+
+            if not done:
+                self.GROUPS[keep] = tempg
+                self.GROUPS = [group for idx, group in enumerate(self.GROUPS) if idx != self.GROUPS.index(dele)]
+
+        self.FC = self.GROUPS[0][0]
+        self.FLOODED = self.GROUPS[0][1]
+        del self.GROUPS[0]
 
 
 #---------------------------------------------
@@ -190,7 +237,7 @@ class Board(object):
     def colorNearcenter(self):
         xc = self.line //2
         yc = self.column //2
-        minD = (0,0,self.line)
+        minD = (0,0,self.line-1)
         for c, coor in self.COLORNEIGHBOR:
             x, y = coor
             d = math.sqrt((xc - x) ** 2 + (yc - y) ** 2)
@@ -198,7 +245,101 @@ class Board(object):
                 minD = (c, coor, d)
         return minD[0]
 
+#---------------------------------------------
+    def colorNearHalf(self):
+        xc = self.line //2
+        yc = self.column -1
+        minD = (0,0,self.line-1)
+        for c, coor in self.COLORNEIGHBOR:
+            x, y = coor
+            d = math.sqrt((xc - x) ** 2 + (yc - y) ** 2)
+            if d < minD[2]:
+                minD = (c, coor, d)
+        return minD[0]
+#---------------------------------------------
+    def colorNearY(self):
+        xc = self.line -1
+        yc = self.column -1
+        minD = (0,0,xc*yc)
+        for c, coor in self.COLORNEIGHBOR:
+            x, y = coor
+            d = math.sqrt((xc - x) ** 2 + (yc - y) ** 2)
+            if d < minD[2]:
+                minD = (c, coor, d)
+        return minD[0]
+#---------------------------------------------
+    def colorNearDiagn(self):
+        xc = self.line -1
+        yc = self.column -1
+        d = xc * math.sqrt(2)
+        minD = (0,0,d)
+        for c, coor in self.COLORNEIGHBOR:
+            x, y = coor
+            d = math.sqrt((xc - x) ** 2 + (yc - y) ** 2)
+            if d < minD[2]:
+                minD = (c, coor, d)
+        return minD[0]
 
+#---------------------------------------------
+    def colorNearTop(self):
+        xc = 0
+        yc = self.column-1
+        minD = (0,0,yc)
+        for c, coor in self.COLORNEIGHBOR:
+            x, y = coor
+            d = math.sqrt((xc - x) ** 2 + (yc - y) ** 2)
+            if d < minD[2]:
+                minD = (c, coor, d)
+        return minD[0]
+
+    # cores de canto superior esquerdo (a) até canto superior direito (b)
+    def quantityColorsAB(self):
+        return len([list(t) for t in set(tuple(row) for row in self.board[0])])
+
+    #diagnonal
+    def quantityColorsAC(self):
+        diag = [self.board[i][i] for i in range(len(self.board)) if self.board[i][i] != self.FC]
+        diag.append(self.FC)
+        return len([list(t) for t in set(tuple(row) for row in diag)])
+    
+    def quantityColorsHalf(self):
+        board_transp = list(zip(*self.board))
+        half = board_transp[self.column//2]
+        lenHalf = len([list(t) for t in set(tuple(row) for row in half)])  # coluna do meio
+        return lenHalf
+    
+    # cores de canto superior esquerdo (a) até canto inferior esquerdo (d)
+    def quantityColorsAD(self):
+        #board_transp = list(zip(*self.board))
+        #return len([list(t) for t in set(tuple(row) for row in board_transp[0])]) 
+        colYAD = [line[0] for line in self.board]
+        return len([list(t) for t in set(tuple(row) for row in colYAD)])
+
+    def quantityColorsY(self):
+        board_transp = list(zip(*self.board))
+        lenY = len([list(t) for t in set(tuple(row) for row in (board_transp[self.column-1]))]) # ultima coluna a esquerda
+        
+        return lenY
+    
+    # AB AD DC
+    # cores de "d" canto inferior esquerdo até "c" canto inferior direito
+    def quantityColorsDC(self):
+       return len([list(t) for t in set(tuple(row) for row in self.board[self.line-1])])
+    
+    def quantityColorsBC(self):
+        #board_transp = list(zip(*self.board))
+        #return len([list(t) for t in set(tuple(row) for row in board_transp[self.column-1])]) 
+        colYBC = [linha[-1] for linha in self.board]
+        return len([list(t) for t in set(tuple(row) for row in colYBC)])
+
+    def quantityColorsCD(self):
+        return len([list(t) for t in set(tuple(row) for row in self.board[self.line-1])]) 
+
+    def quantityColorsDA(self):
+        #board_transp = list(zip(*self.board))
+        #return len([list(t) for t in set(tuple(row) for row in board_transp[0])])
+        colYDA = [linha[0] for linha in self.board]
+        return len([list(t) for t in set(tuple(row) for row in colYDA)])
 #---------------------------------------------
 
     # heuristica nó de estado possíveis
@@ -214,7 +355,7 @@ class Board(object):
                     children.append((child, c)) 
         return children
         
-    # heuristica nó de estado possíveis
+    # vizinho com a cor mais frequente
     def childrenNei(self):
         children = []
         self.colorNeighbor(1)
@@ -247,11 +388,89 @@ class Board(object):
             child.move(c) # troca a cor atual pela nova cor
             children.append((child, c)) 
         return children
+    
+    # filho mais próximo do topo considerando os vizinhos
+    def childrenTopNei(self):
+        children = []
+        self.colorNeighbor(1)
+        c = self.colorNearTop()
+        if (c != self.FC): 
+            child = Board(orig=self) # gera um tabuleiro com o cenário atual
+            child.move(c) # troca a cor atual pela nova cor
+            children.append((child, c)) 
+        return children
+    
+    # filho mais próximo do topo sem considerar os vizinhos
+    def childrenTop(self):
+        c = self.colorInLineX(0) 
+        return c[0]
+    
+    def colorNear(self, xc, yc, maxD):
+        minD = (0,0,maxD)
+        for c, coor in self.COLORNEIGHBOR:
+            x, y = coor
+            d = math.sqrt((xc - x) ** 2 + (yc - y) ** 2)
+            if d < minD[2]:
+                minD = (c, coor, d)
+        return minD[0]
+    
+    
+    # filho mais próximo canto inferior esquerdo (d)
+    def childrenD(self):
+        #children = []
+        #self.colorNeighbor(1)
+        c = self.colorInLineX(self.line -1)  # cor mais da linha self.line -1 mais perto do D
+        #self.colorNear(self.line-1, 0, self.line-1) # cor do vizinho mais perto do D
+        return c[0]
+    
+    # filho mais próximo a
+    def childrenA(self):
+        #children = []
+        #self.colorNeighbor(1)
+        #c = self.colorNear(0, 0, self.line-1)
+        c = self.colorInLineY(0)
+        return c
+    # filho mais próximo canto inferior direito (c)
+    def childrenC(self):
+        c = self.colorInLineY(self.column - 1)
+        return c
+    
+     # filho mais próximo da diagnonal
+    def childrenDiagn(self):
+        c = self.colorInLineDiag() 
+        return c
+    
+     # filho mais próximo da linha inferior
+    def childrenHalf(self):
+        children = []
+        self.colorNeighbor(1)
+        c = self.colorNearHalf()
+        #if (c != self.FC): 
+        #    child = Board(orig=self) # gera um tabuleiro com o cenário atual
+        #    child.move(c) # troca a cor atual pela nova cor
+        #    children.append((child, c)) 
+        #return children
+        return c
+    
+
+    # filho mais próximo do Y extremo
+    def childrenY(self):
+        children = []
+        self.colorNeighbor(1)
+        c = self.colorNearY()
+        #if (c != self.FC): 
+        #    child = Board(orig=self) # gera um tabuleiro com o cenário atual
+        #    child.move(c) # troca a cor atual pela nova cor
+        #    children.append((child, c)) 
+        #return children
+        return c
 #---------------------------------------------
 
     # estado objetivo - ou seja, sem grupo de cores
     def isOver(self):
-        if len(self.GROUPS) == 0:
+        if len(self.GROUPS) == 1:
+            return (self.GROUPS[0][1] == [(0,0)]) and (self.GROUPS[0][0] == self.FC)
+        elif len(self.GROUPS) == 0:
             return True
         else:
             return False
@@ -283,9 +502,14 @@ class Board(object):
             done = True
             for coor in self.FLOODED:
                 x, y = coor
-                for n, g in enumerate(self.groupFilterFC()): # percorre o mapeamento inicial de groups
+                for n, g in enumerate(self.groupFilterFC()): #  percorre o mapeamento inicial de groups
                     #if self.FC == g[0]: # a cor inicial é a cor do grupo 
-                    if (y < self.column and (x, y+1) in g[1]) or (x <= self.line and (x+1, y) in g[1]):
+                    if (y < self.column and (x, y+1) in g[1]) or (x < self.line and (x+1, y) in g[1]):
+                        tempg = g[1]#self.GROUPS[0]
+                        #tempg[1] = tempg[1] + g[1]
+                        done = False
+                        break
+                    if (y < self.column and (x, y-1) in g[1]) or (x < self.line and (x-1, y) in g[1]):
                         tempg = g[1]#self.GROUPS[0]
                         #tempg[1] = tempg[1] + g[1]
                         done = False
@@ -319,8 +543,46 @@ class Board(object):
         print(len(self.GROUPS))
         print(self.GROUPS)
 
-      
 
+    def colorInLineX(self, l):
+        colorsUnique = []
+        for i in range(1, len(self.board[l])):
+            if self.board[l][i] != self.board[l][i-1]:
+                colorsUnique.append(self.board[l][i])  # adiciona a cor, se a cor anterior já existe não adiciona
+                break
+        return colorsUnique
+    
+    def colorInLineY(self, l):
+        #colorsUnique = []
+        #board_transp = [linha[l] for linha in self.board if linha[l] != self.FC]  #list(zip(*self.board))
+        #for i in range(1, len(board_transp)):
+        #    if board_transp[i] != board_transp[i-1]:
+        #        colorsUnique.append(board_transp[i])  # adiciona a cor, se a cor anterior já existe não adiciona
+        #        break    
+        #return colorsUnique
+        return next(linha[l] for linha in self.board if linha[l] != self.FC)
+    
+    def colorInLineDiag(self):
+        #diag = [self.board[i][i] for i in range(len(self.board)) if self.board[i][i] != self.FC]
+        #colorsUnique = []
+        #for i in range(1, len(diag)):
+        #    if diag[i] != diag[i-1]:
+        #        colorsUnique.append(diag[i])
+        #        break  
+        #return colorsUnique
+        return next(self.board[i][i] for i in range(len(self.board)) if self.board[i][i] != self.FC)
+    
+    def colorHalf(self):
+        board_transp = list(zip(*self.board))
+        half = board_transp[self.column//2]
+        colorsUnique = []
+        colorsUnique.append(half[self.column//2][0]) # adiciona a primeira cor
+        for i in range(1, len(half[self.column//2])):
+            if half[self.column//2][i] != half[self.column//2][i-1]:
+                colorsUnique.append(half[self.column//2][i])  # adiciona a cor, se a cor anterior já existe não adiciona
+                break
+        return colorsUnique
+    
 if __name__ == "__main__":
     
     b = Board(size=10, color=4, line=10)

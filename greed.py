@@ -1,36 +1,51 @@
 class Greed():
-    def findMove(self, board):        
-        #print("len(self.FLOODED)"+str(board.scoree())+"-len(self.GROUPS)"+str(board.score()))
-        # if(board.score() < board.scoree()):
-        #     # to-do mudar para a cor mais frequente na borda ?
-        #     board.colorNeighbor()
-        #     children = list(sorted(board.children(), key=lambda x: x[0].score())) # classifica a lista conforme o score len(self.FLOOD)
-        #     return children[0][1] # retorna o FC topo da lista ou seja a nova cor 
-        # else:
-        #board.colorNeighbor()
-        board.colorNeighbor(1)
+    def findMove(self, board): 
 
-        if board.scoree() < (board.column * board.line)//2: # flood menor que a metade, então escolhe o children mais ao meio
-            #print("h1")
-            children = list(sorted(board.childrenCenter(), key=lambda x: x[0].score()))
-        elif board.scoree() < (board.column * board.line)//5 : #len(board.colorsInBoard()) >= board.COLOR_K:
-            #print("h2")
-            children = list(sorted(board.childrenMax(), key=lambda x: x[0].score()))
-        elif len(board.colorsInNEIGHBOR()) >= 10 :  #len(board.COLORNEIGHBOR) >= board.scoree()//2: #board.score():
-            #print("h3")
-            children = list(sorted(board.childrenNei(), key=lambda x: x[0].score()))
+        #"a" canto superior esquerdo
+        #"b" canto superior direito
+        #"c" canto inferior direito
+        #"d" canto inferior esquerdo
+        
+        #AB
+        if board.quantityColorsAB() > 1:  # cores de canto superior esquerdo (a) até canto superior direito (b)
+            board.H.append("hAB")
+            #children = board.childrenTopNei()
+            return board.childrenTop()
+        #BC
+        elif board.quantityColorsBC() > 1: # and (board.H.count('hBC') <= board.H.count('hAB')):
+            board.H.append("hBC")
+            return board.childrenC()
+        #DA
+        elif board.quantityColorsDA() > 1:
+            board.H.append("hDA")
+            return board.childrenA()
+        #CD
+        elif board.quantityColorsCD() > 1:
+            board.H.append("hCD")
+            return board.childrenD()  
+        #AC diagonal
+        elif board.quantityColorsAC() > board.COLOR_K//2:
+            board.H.append("hAC")
+            return board.childrenDiagn()
+        #elif board.quantityColorsHalf() >  1: # coluna do meio tem mais de uma cor
+        #    board.H.append("h1")
+        #    return board.childrenHalf()
+        #elif board.quantityColorsAD() > 1: # cores de canto superior esquerdo (a) até canto inferior esquerdo (d)
+        #    board.H.append("hAD")
+        #    return board.childrenD()
+        #elif board.quantityColorsDC() > 1:
+        #    board.H.append("hDC")
+        #    return board.childrenC()
+        #elif board.quantityColorsY() > board.COLOR_K//2: # coluna esquerda tem mais de uma cor
+        #elif len(board.colorInLine(board.line - 1)) > 1: 
+        #    board.H.append("h2")
+        #    return board.childrenY()
         else:
-            #print("h4")
+            #if(board.resetQTD == 0):
+            #    board.resetQTD = 1
+            #    board.reset()    
+            board.H.append("h3")
             children = list(sorted(board.children(), key=lambda x: x[0].score()))
-
-        #if children == [] :
-        #    children = list(sorted(board.children(), key=lambda x: x[0].scoree()))
-
-        #if (len(board.COLORNEIGHBOR) > 2):
-            #print("COLORNEIGHBOR")
-        #    children = list(sorted(board.children(), key=lambda x: x[0].scoreNeigh()))
-        #else:
-        #    children = list(sorted(board.children(), key=lambda x: x[0].score()))
 
         #children = list(sorted(board.children(), key=lambda x: x[0].score()))
 
