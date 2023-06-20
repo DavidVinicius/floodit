@@ -14,6 +14,10 @@ class Board(object):
    
     COLOR_K = 0
     LAST_MOVE = None
+    LAST_MOVE_X = 0
+    LAST_MOVE_Y = 0
+    LAST_MOVE_I = 0
+    LAST_MOVE_H = None
 
     def __init__(self, orig=None, size=10, color=4, line=10, board=[], GROUPS = None, groupItems = True):
 
@@ -191,6 +195,47 @@ class Board(object):
         self.FC = self.GROUPS[0][0]
         self.FLOODED = self.GROUPS[0][1]
         del self.GROUPS[0]
+
+
+    def reset4(self):
+        # grouping        
+        adds = []
+        for n, g in enumerate(self.GROUPS):
+            for coor in g[1]:
+                x, y = coor
+                for m, gg in enumerate(self.GROUPS):
+                    if n != m and g[0] == gg[0]:
+                        if (y > 0 and (x, y-1) in gg[1]) or (x > 0 and (x-1, y) in gg[1]):
+                            if n < m:
+                                tempg = g
+                                tempg[1] = tempg[1] + gg[1]
+                                keep = n
+                                dele = gg
+                            if n > m:
+                                tempg = gg
+                                tempg[1] = tempg[1] + g[1]
+                                keep = m
+                                dele = g                            
+                            
+                            self.GROUPS[keep] = tempg
+                            if dele in self.GROUPS:
+                                self.GROUPS.remove(dele)
+                            # adds.append({
+                            #     'keep': keep,
+                            #     'tempg': tempg,
+                            #     'dele': dele
+                            # })
+        #print(adds)
+        # for item in adds:        
+        #     print(item)
+        #     self.GROUPS[item.get('keep')] = item.get('tempg')
+        #     if item.get('dele') in self.GROUPS:
+        #         self.GROUPS.remove(item.get('dele'))
+
+        self.FC = self.GROUPS[0][0]
+        self.FLOODED = self.GROUPS[0][1]
+        del self.GROUPS[0]
+
 
 #---------------------------------------------
 
@@ -447,10 +492,8 @@ class Board(object):
         self.colorNeighbor(1)
         c = self.colorNeighborFreqMax()
         if (c != self.FC) : 
-            child = Board(orig=self) 
-            child.move(c)
-            children.append((child, c)) 
-        return children
+            return c
+        return self.childrenCenter()
 
     # filho com a maior posição vizinha
     def childrenMax(self):
@@ -662,6 +705,15 @@ class Board(object):
                 break
         return colorsUnique
     
+    def nextColorInLineX(self, l):
+        self.LAST_MOVE_I = 1 if self.LAST_MOVE_I == 0 else self.LAST_MOVE_I
+        for i in range(self.LAST_MOVE_I, len(self.board[l])):
+            if self.board[l][i] != self.board[l][i-1]:
+                self.LAST_MOVE_X = l
+                self.LAST_MOVE_I = i                
+                return self.board[l][i]
+        return False
+    
     def colorInLineY(self, l):
         #colorsUnique = []
         #board_transp = [linha[l] for linha in self.board if linha[l] != self.FC]  #list(zip(*self.board))
@@ -671,6 +723,16 @@ class Board(object):
         #        break    
         #return colorsUnique
         return next(linha[l] for linha in self.board if linha[l] != self.FC)
+    
+    def nextColorInLineY(self, l):
+        self.LAST_MOVE_I = 1 if self.LAST_MOVE_I == 0 else self.LAST_MOVE_I
+
+        for i in range(self.LAST_MOVE_I, len(self.board[l])):
+            if self.board[i][l] != self.board[i-1][l]:
+                self.LAST_MOVE_Y = l
+                self.LAST_MOVE_I = i
+                return self.board[i][l]
+        return False        
     
     def colorInLineDiag(self):
         #diag = [self.board[i][i] for i in range(len(self.board)) if self.board[i][i] != self.FC]
