@@ -1,8 +1,10 @@
+import datetime
 from board import Board
 from greed import Greed
 
-i = 0
 
+i = 0
+print(datetime.datetime.now())
 n,m,k = map(int, input().split())
 
 estadoInicial = []
@@ -36,27 +38,29 @@ b.GROUPS = groupInicial
 #b.COLORY = b.colorInLineY(b.line - 1)
 #b.COLORM = b.colorHalf()
 b.FLOODED = floodInicial
-
-b.reset()
+b.reset3()
 moves = []
 i=0
 while not b.isOver():
     i+=1
     print(i)
     m = p.findMove(b)
-    print(m)
+    #print(m)
     b.move(m)
-    if len(b.GROUPS) > 0:
-        if (b.GROUPS[0][1] == [(0,0)]) and (b.GROUPS[0][0] != b.FC):
-            del b.GROUPS[0] # remove a primeira posição para atualizar o group
+    #if len(b.GROUPS) > 0:
+    #    if (b.GROUPS[0][1] == [(0,0)]) and (b.GROUPS[0][0] != b.FC):
+    #        del b.GROUPS[0] # remove a primeira posição para atualizar o group
     moves.append('a '+str(m))
     #b.print()
     if i== 100:
         #b.print()
-        print('heuristica usada até o passo 100 '+' hAB:'+str(b.H.count('hAB'))+' hBC:'+str(b.H.count('hBC'))+' hDA:'+str(b.H.count('hDA'))+' hCD:'+str(b.H.count('hCD'))+' hAC:'+str(b.H.count('hCD')))
+        print(moves)
+        print('heuristica usada até o passo 100 '+' h4:'+str(b.H.count('h4'))+' h5:'+str(b.H.count('h5'))+' hAB:'+str(b.H.count('hAB'))+' hBC:'+str(b.H.count('hBC'))+' hDA:'+str(b.H.count('hDA'))+' hCD:'+str(b.H.count('hCD'))+' hAC:'+str(b.H.count('hCD')))
         #break
 
 print(i)
+print(datetime.datetime.now())
 print(moves)
-print('heuristica '+' hAB:'+str(b.H.count('hAB'))+' hBC:'+str(b.H.count('hBC'))+' hDA:'+str(b.H.count('hDA'))+' hCD:'+str(b.H.count('hCD'))+' hAC:'+str(b.H.count('hCD')))
-print(str(b.H))
+
+#print('heuristica '+' hAB:'+str(b.H.count('hAB'))+' hBC:'+str(b.H.count('hBC'))+' hDA:'+str(b.H.count('hDA'))+' hCD:'+str(b.H.count('hCD'))+' hAC:'+str(b.H.count('hCD')))
+#print(str(b.H))
