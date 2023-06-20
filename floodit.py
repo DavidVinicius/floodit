@@ -22,41 +22,24 @@ for i in range(n):
         groupInicial.append([linhaMatriz[j], [(i, j)]])
     estadoInicial.append(linhaMatriz)
 
-b = Board(line=n, size=m, color=k, board=estadoInicial)
-#print(b.colorsInBoard())
-#exit()
-#b.print();
-#print(b.COLOR_K)
-
-#b.print()
-    
+b = Board(line=n, size=m, color=k, board=estadoInicial, GROUPS=groupInicial, groupItems=True)
 p = Greed()
-b.GROUPS = groupInicial
-#b.COLORX = b.colorInLineX(0)
-#b.COLORY = b.colorInLineY(b.line - 1)
-#b.COLORM = b.colorHalf()
-b.FLOODED = floodInicial
-
-b.reset()
 moves = []
 i=0
 while not b.isOver():
     i+=1
-    print(i)
-    m = p.findMove(b)
-    print(m)
-    b.move(m)
-    if len(b.GROUPS) > 0:
-        if (b.GROUPS[0][1] == [(0,0)]) and (b.GROUPS[0][0] != b.FC):
-            del b.GROUPS[0] # remove a primeira posição para atualizar o group
-    moves.append('a '+str(m))
-    #b.print()
-    if i== 100:
+    #print(i)
+    m = p.goToCenter(b)
+    #print(m)
+    b.move(m)    
+    moves.append('a '+str(m))    
+    #if i== 100:
         #b.print()
-        print('heuristica usada até o passo 100 '+' hAB:'+str(b.H.count('hAB'))+' hBC:'+str(b.H.count('hBC'))+' hDA:'+str(b.H.count('hDA'))+' hCD:'+str(b.H.count('hCD'))+' hAC:'+str(b.H.count('hCD')))
+        #print('heuristica usada até o passo 100 '+' hAB:'+str(b.H.count('hAB'))+' hBC:'+str(b.H.count('hBC'))+' hDA:'+str(b.H.count('hDA'))+' hCD:'+str(b.H.count('hCD'))+' hAC:'+str(b.H.count('hCD')))
         #break
 
 print(i)
-print(moves)
-print('heuristica '+' hAB:'+str(b.H.count('hAB'))+' hBC:'+str(b.H.count('hBC'))+' hDA:'+str(b.H.count('hDA'))+' hCD:'+str(b.H.count('hCD'))+' hAC:'+str(b.H.count('hCD')))
-print(str(b.H))
+#print(len(moves))
+print(*moves)
+#print('heuristica '+' hAB:'+str(b.H.count('hAB'))+' hBC:'+str(b.H.count('hBC'))+' hDA:'+str(b.H.count('hDA'))+' hCD:'+str(b.H.count('hCD'))+' hAC:'+str(b.H.count('hCD')))
+#print(str(b.H))

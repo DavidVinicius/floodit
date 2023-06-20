@@ -50,3 +50,11 @@ class Greed():
         #children = list(sorted(board.children(), key=lambda x: x[0].score()))
 
         return children[0][1] # retorna o FC topo da lista ou seja a nova cor 
+
+    def greed(self, board):
+        children = list(sorted(board.children(), key=lambda x: x[0].score()))
+        return children[0][1] # retorna o FC topo da lista ou seja a nova cor 
+    
+    def goToCenter(self, board):
+        children = board.childrenCenter()
+        return children[0][1]

@@ -15,10 +15,11 @@ class Board(object):
     COLOR_K = 0
     LAST_MOVE = None
 
-    def __init__(self, orig=None, size=10, color=4, line=10, board=[]):
+    def __init__(self, orig=None, size=10, color=4, line=10, board=[], GROUPS = None, groupItems = True):
 
 
         self.COLOR_K = color
+        self.groupItems = groupItems
 
         if orig:
             self.COLORS = copy.deepcopy(orig.COLORS)
@@ -43,27 +44,26 @@ class Board(object):
             self.board = board if len(board) != 0 else [[' ' for i in range(self.column)] for i in range(self.line)]
             self.FC = 0
             self.FLOODED = []
-            self.GROUPS = []
+            self.GROUPS = [] if GROUPS is None else GROUPS
             self.COLORNEIGHBOR = []
             self.H = []
             self.COLORX = []
             self.COLORY = []
             self.COLORM = []
             self.resetQTD = 0
-            #self.reset()
+            if self.groupItems == True:
+                self.reset()
+
 
     # passo 1 - ler o arquivo do mapa e mapear quais os grupos iniciais 
     def reset(self):
-        #for i in range(self.line): # linha
-        #    for j in range(self.column): # coluna
-        #        temp_color = self.board[i][j]
-        #        self.GROUPS.append([temp_color, [(i, j)]])
-
-
         # grouping
-        while True:
+        MAX_INTERATIONS = 2
+        i = 0
+        while True or i <= MAX_INTERATIONS:
             done = True
             for n, g in enumerate(self.GROUPS): # para cada grupo
+                #print(n,g)
                 for coor in g[1]: # extrai a coordenada 0,0 tendo 'B', [(0,0)]
                     x, y = coor # não daria para colocar um  if (y > 0 or (x > 0), assim evita percorrer o for da linha 52, para ficar verificando parando no if da linha 54
                     for m, gg in enumerate(self.GROUPS): # percorre todos os grupos
@@ -85,12 +85,12 @@ class Board(object):
                         break
                 if not done:
                     break
+            i += 1
             if done:
                 break
             else:
                 self.GROUPS[keep] = tempg
-                self.GROUPS.remove(dele)
-
+                self.GROUPS.remove(dele)        
         self.FC = self.GROUPS[0][0]
         self.FLOODED = self.GROUPS[0][1]
         del self.GROUPS[0]
@@ -387,6 +387,11 @@ class Board(object):
             child = Board(orig=self) # gera um tabuleiro com o cenário atual
             child.move(c) # troca a cor atual pela nova cor
             children.append((child, c)) 
+        else:
+            c = self.childrenHalf()
+            child = Board(orig=self) # gera um tabuleiro com o cenário atual
+            child.move(c) # troca a cor atual pela nova cor
+            children.append((child, c))
         return children
     
     # filho mais próximo do topo considerando os vizinhos
@@ -474,6 +479,13 @@ class Board(object):
             return True
         else:
             return False
+    
+    def isBoardOver(self):
+        for i in range(self.size):
+            for j in range(self.line):
+                if (self.board[i][j] != self.board):
+                    return False
+        return True
 
 
 #---------------------------------------------
