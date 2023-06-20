@@ -36,6 +36,7 @@ class Board(object):
             self.COLORY = []
             self.COLORM = []
             self.resetQTD = 0
+            self.GROUPS0 = copy.deepcopy(orig.GROUPS)
         else:
             self.COLORS = self.COLORS[0:color]#random.sample(self.COLORS, k=color)
             self.size = size
@@ -51,12 +52,16 @@ class Board(object):
             self.COLORY = []
             self.COLORM = []
             self.resetQTD = 0
-            if self.groupItems == True:
-                self.reset()
-
+            self.GROUPS0 = []
+            #self.reset()
 
     # passo 1 - ler o arquivo do mapa e mapear quais os grupos iniciais 
     def reset(self):
+        #for i in range(self.line): # linha
+        #    for j in range(self.column): # coluna
+        #        temp_color = self.board[i][j]
+        #        self.GROUPS.append([temp_color, [(i, j)]])
+          
         # grouping
         MAX_INTERATIONS = 2
         i = 0
@@ -95,12 +100,15 @@ class Board(object):
         self.FLOODED = self.GROUPS[0][1]
         del self.GROUPS[0]
 
-
     def reset2(self):
         #for i in range(self.line):
         #    for j in range(self.column):
         #        temp_color = self.board[i][j]
         #        self.GROUPS.append([temp_color, [(i, j)]])
+
+        if len(self.GROUPS) > 100:
+            self.GROUPS0 = copy.deepcopy(self.GROUPS)
+            self.GROUPS= self.groupFilterM(2) #self.groupFilterK(100)
 
         done = False
 
@@ -133,11 +141,56 @@ class Board(object):
             if not done:
                 self.GROUPS[keep] = tempg
                 self.GROUPS = [group for idx, group in enumerate(self.GROUPS) if idx != self.GROUPS.index(dele)]
+                if len(self.GROUPS0) > 0:
+                    self.GROUPS0[keep] = tempg
+                    self.GROUPS0 = [group for idx, group in enumerate(self.GROUPS0) if idx != self.GROUPS0.index(dele)]
 
         self.FC = self.GROUPS[0][0]
         self.FLOODED = self.GROUPS[0][1]
         del self.GROUPS[0]
+        if len(self.GROUPS0) > 0:
+            del self.GROUPS0[0]
 
+    def reset3(self):
+        #for i in range(self.line): # linha
+        #    for j in range(self.column): # coluna
+        #        temp_color = self.board[i][j]
+        #        self.GROUPS.append([temp_color, [(i, j)]])
+          
+        # grouping
+
+        done = False
+
+        while not done:
+            done = True
+            new_groups = []
+
+            for n, g in enumerate(self.GROUPS):
+                if not any((x > 0 and (x-1, y) in g[1]) or (y > 0 and (x, y-1) in g[1]) for x, y in g[1]): # verifica se o g não está conectado a outro grupo, ou seja sem vizinho a esquerda ou direita
+                    new_groups.append(g)
+                    continue
+                    #(x > 0 and (x-1, y) in g[1]): Verifica se existe uma coordenada à esquerda da coordenada atual (x, y) do g[1]
+                    #(y > 0 and (x, y-1) in g[1]): Verifica se existe uma coordenada acima da coordenada atual (x, y) do g[1]
+                for x, y in g[1]:
+                    for m, gg in enumerate(self.GROUPS):
+                        if n != m and g[0] == gg[0] and ((x > 0 and (x-1, y) in gg[1]) or (y > 0 and (x, y-1) in gg[1])):
+                            if n < m:
+                                g[1].extend(gg[1])
+                            else:
+                                g = gg
+                                g[1].extend(new_groups[n][1])
+                            done = False
+                            break
+                    if not done:
+                        break
+
+                new_groups.append(g)
+
+            self.GROUPS = new_groups
+
+        self.FC = self.GROUPS[0][0]
+        self.FLOODED = self.GROUPS[0][1]
+        del self.GROUPS[0]
 
 #---------------------------------------------
 
@@ -187,6 +240,31 @@ class Board(object):
         #remove duplicados
         self.COLORNEIGHBOR = [list(t) for t in set(tuple(row) for row in self.COLORNEIGHBOR)]
             
+#---------------------------------------------
+    def colorNeighborGROUPS(self, k):
+
+        self.COLORNEIGHBORGROUPS = []
+        # busca vizinhos
+        for i in range(k):
+            for coor in self.FLOODED: 
+                x, y = coor
+                #direita
+                if y + i < self.column: 
+                    if (self.FC != self.board[x][y + i]) and ( (self.board[x][y + i], (x,y+i)) not in self.COLORNEIGHBORGROUPS):
+                        self.COLORNEIGHBORGROUPS.append([self.board[x][y + i], (x,y+i)])
+                #abaixo
+                if x + i < self.line: 
+                    if (self.FC != self.board[x + i][y]) and ( (self.board[x + i][y], (x+i,y)) not in self.COLORNEIGHBORGROUPS):
+                        self.COLORNEIGHBORGROUPS.append([self.board[x + i][y], (x+i,y)])
+                #esquerda
+                if (self.FC != self.board[x][y - i]) and ( (self.board[x][y - i], (x,y-i)) not in self.COLORNEIGHBORGROUPS) and (y - i > 0) :
+                    self.COLORNEIGHBORGROUPS.append([self.board[x][y - i], (x,y-i)])
+                #cima
+                if (self.FC != self.board[x - i][y]) and ( (self.board[x - i][y], (x-i,y)) not in self.COLORNEIGHBORGROUPS) and (x - i > 0) :
+                    self.COLORNEIGHBORGROUPS.append([self.board[x - i][y], (x-i,y)])
+        #remove duplicados
+        self.COLORNEIGHBORGROUPS = [list(t) for t in set(tuple(row) for row in self.COLORNEIGHBORGROUPS)]
+            
 
 
     #A cor mais frequente na borda    
@@ -233,6 +311,14 @@ class Board(object):
         groupFilter = [(i, x[1]) for i, x in enumerate(self.GROUPS) if x[0] == self.FC]
         return groupFilter
     
+    # retorna apenas os grupos k primeiros grupos
+    def groupFilterK(self, k):
+        return [self.GROUPS0[i] for i in range(len(self.GROUPS0)) if (self.GROUPS0[i][1][0][0] > 0) and (self.GROUPS0[i][1][0][1] > 0) and (i < k) ]
+    
+    #retorna apenas os grupos com coordenadas menores ou igual ao delimitador em tabuleiro divido por k 
+    def groupFilterM(self, k):
+        return [self.GROUPS0[i] for i in range(len(self.GROUPS0)) if (self.GROUPS0[i][1][0][0] <= self.GROUPS0[-1][1][0][0]//k) and (self.GROUPS0[i][1][0][1] <= self.GROUPS0[-1][1][0][1]//k) ]
+  
 #---------------------------------------------
     def colorNearcenter(self):
         xc = self.line //2
@@ -351,8 +437,8 @@ class Board(object):
                 child.move(c) # troca a cor atual pela nova cor
                 if (len(child.GROUPS) < len(self.GROUPS)): # ) and (len(child.FLOODED) > len(self.FLOODED)) verifica se o grupo de cores direntes do nó aberto é menor que o nó
                     children.append((child, c)) # então adiciona o nó aberto  
-                elif len(child.FLOODED)+len(child.GROUPS) == len(self.GROUPS) + len(self.FLOODED):
-                    children.append((child, c)) 
+                #elif len(child.FLOODED)+len(child.GROUPS) == len(self.GROUPS) + len(self.FLOODED):
+                #    children.append((child, c)) 
         return children
         
     # vizinho com a cor mais frequente
@@ -380,19 +466,11 @@ class Board(object):
     
     # filho mais próximo do centro
     def childrenCenter(self):
-        children = []
         self.colorNeighbor(1)
         c = self.colorNearcenter()
-        if (c != self.FC): 
-            child = Board(orig=self) # gera um tabuleiro com o cenário atual
-            child.move(c) # troca a cor atual pela nova cor
-            children.append((child, c)) 
-        else:
-            c = self.childrenHalf()
-            child = Board(orig=self) # gera um tabuleiro com o cenário atual
-            child.move(c) # troca a cor atual pela nova cor
-            children.append((child, c))
-        return children
+        if (c == self.FC): 
+            c = self.childrenHalf()                
+        return c
     
     # filho mais próximo do topo considerando os vizinhos
     def childrenTopNei(self):
@@ -516,12 +594,7 @@ class Board(object):
                 x, y = coor
                 for n, g in enumerate(self.groupFilterFC()): #  percorre o mapeamento inicial de groups
                     #if self.FC == g[0]: # a cor inicial é a cor do grupo 
-                    if (y < self.column and (x, y+1) in g[1]) or (x < self.line and (x+1, y) in g[1]):
-                        tempg = g[1]#self.GROUPS[0]
-                        #tempg[1] = tempg[1] + g[1]
-                        done = False
-                        break
-                    if (y < self.column and (x, y-1) in g[1]) or (x < self.line and (x-1, y) in g[1]):
+                    if (y < self.column and ((x, y+1) in g[1] or (x, y-1) in g[1]) ) or (x < self.line and ( (x+1, y) in g[1] or (x-1, y) in g[1] ) ):
                         tempg = g[1]#self.GROUPS[0]
                         #tempg[1] = tempg[1] + g[1]
                         done = False
@@ -533,10 +606,35 @@ class Board(object):
             else:
                 self.FLOODED += tempg#self.GROUPS[0][1] += tempg
                 del self.GROUPS[g[0]]#self.GROUPS[n]
+                if len(self.GROUPS0) > 0:
+                    del self.GROUPS0[g[0]]
 
 
 #---------------------------------------------
+    def floodFC(self):
+        
+        while True:
+            done = True
+            for n, g in enumerate(self.groupFilterFC()): # self.FLOODED
+                for coor in self.COLORNEIGHBOR: # self.groupFilterFC() percorre o mapeamento inicial de groups
+                    x, y = coor[1]
+                    if (y < self.column or x < self.line ) and ((x, y) in g[1]):
+                        tempg = g[1]#self.GROUPS[0]
+                        #tempg[1] = tempg[1] + g[1]
+                        done = False
+                        break
+                if not done:
+                    break
+            if done:
+                break
+            else:
+                self.FLOODED += tempg#self.GROUPS[0][1] += tempg
+                del self.GROUPS[g[0]]#self.GROUPS[n]
+                if len(self.GROUPS0) > 0:
+                    del self.GROUPS0[g[0]]
 
+
+#---------------------------------------------
 
     def print(self):
         print()
