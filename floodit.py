@@ -31,18 +31,18 @@ moves = []
 i=0
 while not b.isOver():
     i+=1
-    #print(i)
-    m = p.borders(b)
-    #print(m)
+    print(i, end=" ")
+    m = p.goToCenter(b)
+    print(m)
     b.move(m)
     #if len(b.GROUPS) > 0:
     #    if (b.GROUPS[0][1] == [(0,0)]) and (b.GROUPS[0][0] != b.FC):
     #        del b.GROUPS[0] # remove a primeira posição para atualizar o group
     moves.append('a '+str(m))
     #b.print()
-    #if i== 100:
-        #b.print()
-    #    print(moves)
+    if i % 10 == 0:
+        #b.print()        
+        print(*moves)
     #    print('heuristica usada até o passo 100 '+' h4:'+str(b.H.count('h4'))+' h5:'+str(b.H.count('h5'))+' hAB:'+str(b.H.count('hAB'))+' hBC:'+str(b.H.count('hBC'))+' hDA:'+str(b.H.count('hDA'))+' hCD:'+str(b.H.count('hCD'))+' hAC:'+str(b.H.count('hCD')))
         #break
 

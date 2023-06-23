@@ -71,24 +71,27 @@ class Greed():
     
     def borders(self, board):
         color = False
-        if board.LAST_MOVE_H == None or board.LAST_MOVE_H == 'X':
+        if board.LAST_MOVE_H == None or board.LAST_MOVE_H == 'X':            
             color = board.nextColorInLineX(0)
             board.LAST_MOVE_H = 'X' 
 
         if board.LAST_MOVE_H != 'C' and (board.LAST_MOVE_H == 'YY' or color == False):
-            board.LAST_MOVE_I = 1
+            if color == False:
+                board.LAST_MOVE_I = 1
             #print('XX', end=' ')
             color = board.nextColorInLineY(board.line-1)
             board.LAST_MOVE_H = 'YY'
 
         if board.LAST_MOVE_H != 'XX' and board.LAST_MOVE_H != 'C' and (board.LAST_MOVE_H == 'Y' or color == False):
-            board.LAST_MOVE_I = 1
+            if color == False:
+                board.LAST_MOVE_I = 1            
             #print('Y', end=' ')
             color = board.nextColorInLineY(0)
             board.LAST_MOVE_H = 'Y'
         
         if board.LAST_MOVE_H != 'C' and (board.LAST_MOVE_H == 'XX' or color == False):
-            board.LAST_MOVE_I = 1
+            if color == False:
+                board.LAST_MOVE_I = 1            
             #print('XX', end=' ')
             color = board.nextColorInLineX(board.size-1)
             board.LAST_MOVE_H = 'XX'
