@@ -29,7 +29,7 @@ b.reset4()
 p = Greed()
 moves = []
 i=0
-while not b.isOver():
+while not b.isBoardOver():
     i+=1
     print(i)
     m = p.borders2(b)

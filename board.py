@@ -272,7 +272,7 @@ class Board(object):
             x, y = coor
             self.board[x][y] = c
         #self.colorNeighbor(1)
-        self.flood()
+        self.flood2()
 
 #---------------------------------------------
     def colorNeighbor(self, i):
@@ -607,18 +607,20 @@ class Board(object):
 
     # estado objetivo - ou seja, sem grupo de cores
     def isOver(self):
-        if len(self.GROUPS) == 1:
-            return (self.GROUPS[0][1] == [(0,0)]) and (self.GROUPS[0][0] == self.FC)
-        elif len(self.GROUPS) == 0:
-            return True
-        else:
-            return False
+        return len(self.GROUPS) == 0
+        # if len(self.GROUPS) == 1:
+        #     return (self.GROUPS[0][1] == [(0,0)]) and (self.GROUPS[0][0] == self.FC)
+        # elif 
+        #     return True
+        # else:
+        #     return False
     
     def isBoardOver(self):
-        for i in range(self.size):
-            for j in range(self.line):
-                if (self.board[i][j] != self.board):
-                    return False
+        print(self.line, self.column)
+        for i in range(0, self.line):
+            for j in range(0, self.column):
+                if (self.board[i][j] != self.board[0][0]):
+                    return False                
         return True
 
 
@@ -662,8 +664,23 @@ class Board(object):
             else:
                 self.FLOODED += tempg#self.GROUPS[0][1] += tempg
                 del self.GROUPS[g[0]]#self.GROUPS[n]
-                if len(self.GROUPS0) > 0:
-                    del self.GROUPS0[g[0]]
+                if len(self.GROUPS) > 0:
+                    del self.GROUPS[g[0]]
+    
+    def flood2(self):
+                        
+        for coor in self.FLOODED:
+            x, y = coor
+            for n, g in enumerate(self.GROUPS): #  percorre o mapeamento inicial de groups
+                if self.FC == g[0]: # a cor inicial é a cor do grupo 
+                    if (y < self.column and (x, y+1) in g[1]) or (x <= self.line and (x+1, y) in g[1]):
+                        tempg = g[1]#self.GROUPS[0]
+                        #tempg[1] = tempg[1] + g[1]
+                    
+                        self.FLOODED += tempg
+                        del self.GROUPS[n]
+                        #print(g)
+                        #print(self.GROUPS)
 
 
 #---------------------------------------------
@@ -720,7 +737,7 @@ class Board(object):
     
     def nextColorInLineX(self, l):
         self.LAST_MOVE_I = 1 if self.LAST_MOVE_I == 0 else self.LAST_MOVE_I
-        for i in range(self.LAST_MOVE_I, len(self.board[l])):
+        for i in range(self.LAST_MOVE_I, self.line):
             if self.board[l][i] != self.board[l][i-1]:
                 self.LAST_MOVE_X = l
                 self.LAST_MOVE_I = i                
