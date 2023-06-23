@@ -75,6 +75,7 @@ class Greed():
             color = board.nextColorInLineX(0)
             board.LAST_MOVE_H = 'X' 
 
+
         if board.LAST_MOVE_H != 'C' and (board.LAST_MOVE_H == 'YY' or color == False):
             if color == False:
                 board.LAST_MOVE_I = 1
@@ -82,12 +83,14 @@ class Greed():
             color = board.nextColorInLineY(board.line-1)
             board.LAST_MOVE_H = 'YY'
 
+
         if board.LAST_MOVE_H != 'XX' and board.LAST_MOVE_H != 'C' and (board.LAST_MOVE_H == 'Y' or color == False):
             if color == False:
                 board.LAST_MOVE_I = 1            
             #print('Y', end=' ')
             color = board.nextColorInLineY(0)
             board.LAST_MOVE_H = 'Y'
+
         
         if board.LAST_MOVE_H != 'C' and (board.LAST_MOVE_H == 'XX' or color == False):
             if color == False:
@@ -95,6 +98,7 @@ class Greed():
             #print('XX', end=' ')
             color = board.nextColorInLineX(board.size-1)
             board.LAST_MOVE_H = 'XX'
+
         
         
             
@@ -103,6 +107,70 @@ class Greed():
             #print('C', end=' ')
             color = board.childrenNei()
             board.LAST_MOVE_H = 'C'        
+            
+        
+        return color
+
+    def borders2(self, board):
+        color = False
+
+        if board.X_DONE == 0: # and (board.LAST_MOVE_H == None or board.LAST_MOVE_H == 'X'):
+            color = board.nextColorInLineX_K(board.START_X, board.STOP_X)
+            board.LAST_MOVE_H = 'X' 
+            if color != False:
+                return color
+            else:
+                board.X_DONE = 1
+                board.START_Y = board.LAST_MOVE_I if board.START_X > 0 else 0
+                board.Y_DONE = 0
+                board.LAST_MOVE_I = 1
+            
+        if board.Y_DONE == 0: #and (board.LAST_MOVE_H != 'XX' and board.LAST_MOVE_H != 'C' and (board.LAST_MOVE_H == 'Y' or color == False)):
+            #board.LAST_MOVE_I = 1
+            print('Y', end=' ')
+            color = board.nextColorInLineY_K(board.START_Y, board.STOP_Y)
+            board.LAST_MOVE_H = 'Y'
+            if color != False:
+                return color
+            else:
+                board.Y_DONE = 1
+                board.START_X = board.LAST_MOVE_I
+                board.STOP_X = board.STOP_X//2
+                board.X_DONE = 0
+                board.LAST_MOVE_I = 1
+
+        #if board.XY_DONE == 0 and (board.LAST_MOVE_H != 'C' and (board.LAST_MOVE_H == 'YY' or color == False) ):
+        #    #board.LAST_MOVE_I = 1
+        #    #print('XX', end=' ')
+        #    color = board.nextColorInLineY((board.column - 1) //2)
+        #    board.LAST_MOVE_H = 'YY'
+        #    if color != False:
+        #        return color
+        #    else:
+        #        board.XY_DONE = 1
+        #        board.LAST_MOVE_I = 1
+
+        
+        
+        if board.XX_DONE == 0 and (board.LAST_MOVE_H != 'C' and (board.LAST_MOVE_H == 'XX' or color == False) ):
+            board.LAST_MOVE_I = 1
+            print('XX', end=' ')
+            color = board.nextColorInLineX(board.size-1)
+            board.LAST_MOVE_H = 'XX'
+            if color != False:
+                return color
+            else:
+                board.XX_DONE = 1
+                board.LAST_MOVE_I = 1
+        
+            
+        
+        if color == False or board.LAST_MOVE_H == 'C':
+            print('C', end=' ')
+            color = board.childrenNei()
+            board.LAST_MOVE_H = 'C'        
+            if color != False:
+                return color
             
         
         return color

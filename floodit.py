@@ -31,9 +31,9 @@ moves = []
 i=0
 while not b.isOver():
     i+=1
-    print(i, end=" ")
-    m = p.goToCenter(b)
-    print(m)
+    print(i)
+    m = p.borders2(b)
+    #print(m)
     b.move(m)
     #if len(b.GROUPS) > 0:
     #    if (b.GROUPS[0][1] == [(0,0)]) and (b.GROUPS[0][0] != b.FC):
