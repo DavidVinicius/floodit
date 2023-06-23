@@ -18,6 +18,15 @@ class Board(object):
     LAST_MOVE_Y = 0
     LAST_MOVE_I = 0
     LAST_MOVE_H = None
+    X_DONE = 0
+    XY_DONE = 0
+    Y_DONE = 0
+    XX_DONE = 1
+    K_STEP = 2
+    START_X = 0
+    STOP_X = 0
+    START_Y = 0
+    STOP_Y = 0
 
     def __init__(self, orig=None, size=10, color=4, line=10, board=[], GROUPS = None, groupItems = True):
 
@@ -41,6 +50,8 @@ class Board(object):
             self.COLORM = []
             self.resetQTD = 0
             self.GROUPS0 = copy.deepcopy(orig.GROUPS)
+            self.STOP_X = orig.column//2
+            self.STOP_Y = orig.line//3
         else:
             self.COLORS = self.COLORS[0:color]#random.sample(self.COLORS, k=color)
             self.size = size
@@ -57,6 +68,8 @@ class Board(object):
             self.COLORM = []
             self.resetQTD = 0
             self.GROUPS0 = []
+            self.STOP_X = size//2
+            self.STOP_Y = line//3
             #self.reset()
 
     # passo 1 - ler o arquivo do mapa e mapear quais os grupos iniciais 
@@ -714,6 +727,15 @@ class Board(object):
                 return self.board[l][i]
         return False
     
+    def nextColorInLineX_K(self, l, k):
+        self.LAST_MOVE_I = 1 if self.LAST_MOVE_I == 0 else self.LAST_MOVE_I
+        for i in range(self.LAST_MOVE_I, k):
+            if self.board[l][i] != self.board[l][i-1]:
+                self.LAST_MOVE_X = l
+                self.LAST_MOVE_I = i                
+                return self.board[l][i]
+        return False
+    
     def colorInLineY(self, l):
         #colorsUnique = []
         #board_transp = [linha[l] for linha in self.board if linha[l] != self.FC]  #list(zip(*self.board))
@@ -727,12 +749,22 @@ class Board(object):
     def nextColorInLineY(self, l):
         self.LAST_MOVE_I = 1 if self.LAST_MOVE_I == 0 else self.LAST_MOVE_I
 
-        for i in range(self.LAST_MOVE_I, len(self.board[l])):
+        for i in range(self.LAST_MOVE_I, self.line):
             if self.board[i][l] != self.board[i-1][l]:
                 self.LAST_MOVE_Y = l
                 self.LAST_MOVE_I = i
                 return self.board[i][l]
         return False        
+    
+    def nextColorInLineY_K(self, l, K):
+        self.LAST_MOVE_I = 1 if self.LAST_MOVE_I == 0 else self.LAST_MOVE_I
+
+        for i in range(self.LAST_MOVE_I, K):
+            if self.board[i][l] != self.board[i-1][l]:
+                self.LAST_MOVE_Y = l
+                self.LAST_MOVE_I = i
+                return self.board[i][l]
+        return False  
     
     def colorInLineDiag(self):
         #diag = [self.board[i][i] for i in range(len(self.board)) if self.board[i][i] != self.FC]

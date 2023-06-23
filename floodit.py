@@ -31,8 +31,8 @@ moves = []
 i=0
 while not b.isOver():
     i+=1
-    #print(i)
-    m = p.borders(b)
+    print(i)
+    m = p.borders2(b)
     #print(m)
     b.move(m)
     #if len(b.GROUPS) > 0:
@@ -40,7 +40,9 @@ while not b.isOver():
     #        del b.GROUPS[0] # remove a primeira posição para atualizar o group
     moves.append('a '+str(m))
     #b.print()
-    #if i== 100:
+    #if len(b.GROUPS) < 5:
+    #    print(">>> "+str(len(b.GROUPS)) +" - "+str(len(b.FLOODED))) 
+    #if i >= 30:
         #b.print()
     #    print(moves)
     #    print('heuristica usada até o passo 100 '+' h4:'+str(b.H.count('h4'))+' h5:'+str(b.H.count('h5'))+' hAB:'+str(b.H.count('hAB'))+' hBC:'+str(b.H.count('hBC'))+' hDA:'+str(b.H.count('hDA'))+' hCD:'+str(b.H.count('hCD'))+' hAC:'+str(b.H.count('hCD')))
