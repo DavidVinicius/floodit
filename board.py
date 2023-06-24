@@ -27,6 +27,7 @@ class Board(object):
     STOP_X = 0
     START_Y = 0
     STOP_Y = 0
+    DY_DONE = 0
 
     def __init__(self, orig=None, size=10, color=4, line=10, board=[], GROUPS = None, groupItems = True):
 
@@ -50,8 +51,8 @@ class Board(object):
             self.COLORM = []
             self.resetQTD = 0
             self.GROUPS0 = copy.deepcopy(orig.GROUPS)
-            self.STOP_X = orig.column//2
-            self.STOP_Y = orig.line//3
+            self.STOP_X = orig.column//3
+            self.STOP_Y = orig.line//2
         else:
             self.COLORS = self.COLORS[0:color]#random.sample(self.COLORS, k=color)
             self.size = size
@@ -68,8 +69,8 @@ class Board(object):
             self.COLORM = []
             self.resetQTD = 0
             self.GROUPS0 = []
-            self.STOP_X = size//2
-            self.STOP_Y = line//3
+            self.STOP_X = size//3
+            self.STOP_Y = line//2
             #self.reset()
 
     # passo 1 - ler o arquivo do mapa e mapear quais os grupos iniciais 
@@ -597,12 +598,9 @@ class Board(object):
         children = []
         self.colorNeighbor(1)
         c = self.colorNearY()
-        #if (c != self.FC): 
-        #    child = Board(orig=self) # gera um tabuleiro com o cenário atual
-        #    child.move(c) # troca a cor atual pela nova cor
-        #    children.append((child, c)) 
-        #return children
-        return c
+        if (c != self.FC): 
+            return c
+        return False
 #---------------------------------------------
 
     # estado objetivo - ou seja, sem grupo de cores
@@ -749,6 +747,7 @@ class Board(object):
         for i in range(self.LAST_MOVE_I, k):
             if self.board[l][i] != self.board[l][i-1]:
                 self.LAST_MOVE_X = l
+                i = i if self.board[l][i] != self.FC else i-1 # para o caso de self.board[30][5] 3 e self.board[30][4] 8 e FC 3
                 self.LAST_MOVE_I = i                
                 return self.board[l][i]
         return False
@@ -779,6 +778,7 @@ class Board(object):
         for i in range(self.LAST_MOVE_I, K):
             if self.board[i][l] != self.board[i-1][l]:
                 self.LAST_MOVE_Y = l
+                i = i if self.board[i][l] != self.FC else i-1
                 self.LAST_MOVE_I = i
                 return self.board[i][l]
         return False  
