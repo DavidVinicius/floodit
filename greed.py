@@ -171,12 +171,19 @@ class Greed():
             if color != False:
                 return color
             
+        #if board.MAXCHILDREN_DONE==0 and color == False:
+        #    print('M', end=' ')
+        #    color = board.childrenMax()
+        #    board.MAXCHILDREN_DONE=1
+        #    if color != False:
+        #       return color
         
         if color == False or board.LAST_MOVE_H == 'C':
             print('C', end=' ')
             color = board.childrenNei()
             board.LAST_MOVE_H = 'C' 
-            board.DY_DONE = 0       
+            board.DY_DONE = 0  
+            board.MAXCHILDREN_DONE=0     
             if color != False:
                 return color
             
