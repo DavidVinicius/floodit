@@ -289,17 +289,17 @@ class Board(object):
             x, y = coor
             #direita
             if y + i < self.column: 
-                if (self.FC != self.board[x][y + i]) and ( (self.board[x][y + i], (x,y+i)) not in self.COLORNEIGHBOR):
+                if (self.FC != self.board[x][y + i]) and ( [self.board[x][y + i], (x,y+i)] not in self.COLORNEIGHBOR):
                     self.COLORNEIGHBOR.append([self.board[x][y + i], (x,y+i)])
             #abaixo
             if x + i < self.line: 
-                if (self.FC != self.board[x + i][y]) and ( (self.board[x + i][y], (x+i,y)) not in self.COLORNEIGHBOR):
+                if (self.FC != self.board[x + i][y]) and ( [self.board[x + i][y], (x+i,y)] not in self.COLORNEIGHBOR):
                     self.COLORNEIGHBOR.append([self.board[x + i][y], (x+i,y)])
             #esquerda
-            if (self.FC != self.board[x][y - i]) and ( (self.board[x][y - i], (x,y-i)) not in self.COLORNEIGHBOR) and (y - i > 0) :
+            if (self.FC != self.board[x][y - i]) and ( [self.board[x][y - i], (x,y-i)] not in self.COLORNEIGHBOR) and (y - i > 0) :
                 self.COLORNEIGHBOR.append([self.board[x][y - i], (x,y-i)])
             #cima
-            if (self.FC != self.board[x - i][y]) and ( (self.board[x - i][y], (x-i,y)) not in self.COLORNEIGHBOR) and (x - i > 0) :
+            if (self.FC != self.board[x - i][y]) and ( [self.board[x - i][y], (x-i,y)] not in self.COLORNEIGHBOR) and (x - i > 0) :
                 self.COLORNEIGHBOR.append([self.board[x - i][y], (x-i,y)])
         #remove duplicados
         self.COLORNEIGHBOR = [list(t) for t in set(tuple(row) for row in self.COLORNEIGHBOR)]
@@ -311,23 +311,23 @@ class Board(object):
         # busca vizinhos
         for coor in self.FLOODED: 
             x, y = coor
-
-            # Esquerda 1,1 != 1,2
-            if y + i < self.column: 
-                if self.board[x][y] != self.board[x][y+i] and ( (self.board[x][y], (x,y)) not in self.FLOODEDBORDER):
-                        self.FLOODEDBORDER.append([self.board[x][y], (x,y)])
-            # Abaixo 1,1 != 2,1
-            if x + i < self.line:
-                if self.board[x][y] != self.board[x+i][y] and ( (self.board[x][y], (x,y)) not in self.FLOODEDBORDER):
-                        self.FLOODEDBORDER.append([self.board[x][y], (x,y)])
-            # Direita 1,1 != 1, 0
-            if y - i > 0:    
-                if self.board[x][y] != self.board[x][y-i] and ( (self.board[x][y], (x,y)) not in self.FLOODEDBORDER):
-                        self.FLOODEDBORDER.append([self.board[x][y], (x,y)])
-            # Acima 1,1 != 2, 1
-            if x - i > 0:
-                if self.board[x][y] != self.board[x-i][y] and ( (self.board[x][y], (x,y)) not in self.FLOODEDBORDER):
-                        self.FLOODEDBORDER.append([self.board[x][y], (x,y)])
+            if [self.board[x][y], (x,y)] not in self.FLOODEDBORDER:
+                # Esquerda 1,1 != 1,2
+                if y + i < self.column: 
+                    if self.board[x][y] != self.board[x][y+i] and ( [self.board[x][y], (x,y)] not in self.FLOODEDBORDER):
+                            self.FLOODEDBORDER.append([self.board[x][y], (x,y)])
+                # Abaixo 1,1 != 2,1
+                if x + i < self.line:
+                    if self.board[x][y] != self.board[x+i][y]:
+                            self.FLOODEDBORDER.append([self.board[x][y], (x,y)])
+                # Direita 1,1 != 1, 0
+                if y - i > 0:    
+                    if self.board[x][y] != self.board[x][y-i]:
+                            self.FLOODEDBORDER.append([self.board[x][y], (x,y)])
+                # Acima 1,1 != 2, 1
+                if x - i > 0:
+                    if self.board[x][y] != self.board[x-i][y]:
+                            self.FLOODEDBORDER.append([self.board[x][y], (x,y)])
 
         #remove duplicados
         self.FLOODEDBORDER = [list(t) for t in set(tuple(row) for row in self.FLOODEDBORDER)]
@@ -401,7 +401,7 @@ class Board(object):
     def groupFilterFC(self):
         #coresCoord = list(map(lambda x: x if (x[0] == self.FC) else None, self.GROUPS))
         #list(filter(lambda x: x is not None, coresCoord ))
-        groupFilter = [(i, x[1]) for i, x in enumerate(self.GROUPS) if x[0] == self.FC or x[0] == self.LAST_MOVE_PEN]
+        groupFilter = [(i, x[1]) for i, x in enumerate(self.GROUPS) if x[0] == self.FC] # or x[0] == self.LAST_MOVE_PEN
         return groupFilter
     
     # retorna apenas os grupos da cor atual
