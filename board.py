@@ -369,6 +369,13 @@ class Board(object):
         groupFilter = [(i, x[1]) for i, x in enumerate(self.GROUPS) if x[0] == self.FC]
         return groupFilter
     
+    # retorna apenas os grupos da cor atual
+    def groupFilterFC2(self):
+        #coresCoord = list(map(lambda x: x if (x[0] == self.FC) else None, self.GROUPS))
+        #list(filter(lambda x: x is not None, coresCoord ))
+        groupFilter = [(i, x) for i, x in enumerate(self.GROUPS) if x[0] == self.FC]
+        return groupFilter
+    
     # retorna apenas os grupos k primeiros grupos
     def groupFilterK(self, k):
         return [self.GROUPS0[i] for i in range(len(self.GROUPS0)) if (self.GROUPS0[i][1][0][0] > 0) and (self.GROUPS0[i][1][0][1] > 0) and (i < k) ]
@@ -525,7 +532,7 @@ class Board(object):
         self.colorNeighbor(1)
         c = self.colorNearcenter()
         if (c == self.FC): 
-            c = self.childrenHalf()                
+            c = self.childrenC()                
         return c
     
     # filho mais próximo do topo considerando os vizinhos

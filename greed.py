@@ -152,16 +152,16 @@ class Greed():
 
         
         
-        if board.XX_DONE == 0 and (board.LAST_MOVE_H != 'C' and (board.LAST_MOVE_H == 'XX' or color == False) ):
-            board.LAST_MOVE_I = 1
-            print('XX', end=' ')
-            color = board.nextColorInLineX(board.size-1)
-            board.LAST_MOVE_H = 'XX'
-            if color != False:
-                return color
-            else:
-                board.XX_DONE = 1
-                board.LAST_MOVE_I = 1
+        # if board.XX_DONE == 0 and (board.LAST_MOVE_H != 'C' and (board.LAST_MOVE_H == 'XX' or color == False) ):
+        #     board.LAST_MOVE_I = 1
+        #     print('XX', end=' ')
+        #     color = board.nextColorInLineX(board.size-1)
+        #     board.LAST_MOVE_H = 'XX'
+        #     if color != False:
+        #         return color
+        #     else:
+        #         board.XX_DONE = 1
+        #         board.LAST_MOVE_I = 1
         
             
         
@@ -173,4 +173,4 @@ class Greed():
                 return color
             
         
-        return color
+        return color     
