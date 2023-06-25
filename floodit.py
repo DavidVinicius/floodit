@@ -1,4 +1,3 @@
-import datetime
 from board import Board
 from greed import Greed
 
@@ -29,16 +28,10 @@ p = Greed()
 moves = []
 i=0
 while not b.isBoardOver():
-    i+=1
-    print(i)
-    m = p.borders2(b)
-    #print(m)
-    #b.LAST_MOVE_PEN = moves[-1][2] if len(moves) > 0 else b.FC
+    i+=1    
+    m = p.borders2(b)    
     b.move(m)
-    moves.append('a '+str(m))
-    #b.print()
-    #if i % 10 == 0:
-    #    print(*moves)
+    moves.append('a '+str(m))    
     
 print(i)
 print(*moves)

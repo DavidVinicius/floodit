@@ -274,11 +274,13 @@ class Board(object):
         self.floodBorder(1)
         self.FC = c
         self.LAST_MOVE = c
+        
+        self.flood2()
+
         for coor in self.FLOODED:
             x, y = coor
-            self.board[x][y] = c
-        #self.colorNeighbor(1)
-        self.flood2()
+            self.board[x][y] = c        
+        
 
 #---------------------------------------------
     def colorNeighbor(self, i):
@@ -302,7 +304,7 @@ class Board(object):
             if (self.FC != self.board[x - i][y]) and ( [self.board[x - i][y], (x-i,y)] not in self.COLORNEIGHBOR) and (x - i > 0) :
                 self.COLORNEIGHBOR.append([self.board[x - i][y], (x-i,y)])
         #remove duplicados
-        self.COLORNEIGHBOR = [list(t) for t in set(tuple(row) for row in self.COLORNEIGHBOR)]
+        #self.COLORNEIGHBOR = [list(t) for t in set(tuple(row) for row in self.COLORNEIGHBOR)]
             
 #---------------------------------------------
     def floodBorder(self, i):
@@ -330,7 +332,7 @@ class Board(object):
                             self.FLOODEDBORDER.append([self.board[x][y], (x,y)])
 
         #remove duplicados
-        self.FLOODEDBORDER = [list(t) for t in set(tuple(row) for row in self.FLOODEDBORDER)]
+        #self.FLOODEDBORDER = [list(t) for t in set(tuple(row) for row in self.FLOODEDBORDER)]
   
 
 #---------------------------------------------
@@ -655,11 +657,10 @@ class Board(object):
         # else:
         #     return False
     
-    def isBoardOver(self):
-        print(self.line, self.column)
+    def isBoardOver(self):        
         for i in range(0, self.line):
             for j in range(0, self.column):
-                if (self.board[i][j] != self.board[0][0]):
+                if (self.board[i][j] != self.board[0][0]):                    
                     return False                
         return True
 
@@ -709,7 +710,7 @@ class Board(object):
     
     def flood2(self):
                         
-        for nf, coor in self.FLOODEDBORDER:
+        for ng, coor in self.FLOODEDBORDER:
             x, y = coor
             for n, g in enumerate(self.GROUPS): #  percorre o mapeamento inicial de groups
                 if self.FC == g[0]: # a cor inicial é a cor do grupo 
