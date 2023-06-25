@@ -13,7 +13,8 @@ class Board(object):
 
    
     COLOR_K = 0
-    LAST_MOVE = None
+    LAST_MOVE = None # ultima cor escolhida
+    LAST_MOVE_PEN = None # penultima cor escolihada
     LAST_MOVE_X = 0
     LAST_MOVE_Y = 0
     LAST_MOVE_I = 0
@@ -27,6 +28,8 @@ class Board(object):
     STOP_X = 0
     START_Y = 0
     STOP_Y = 0
+    DY_DONE = 0
+    MAXCHILDREN_DONE = 0
 
     def __init__(self, orig=None, size=10, color=4, line=10, board=[], GROUPS = None, groupItems = True):
 
@@ -50,8 +53,9 @@ class Board(object):
             self.COLORM = []
             self.resetQTD = 0
             self.GROUPS0 = copy.deepcopy(orig.GROUPS)
-            self.STOP_X = orig.column//2
-            self.STOP_Y = orig.line//3
+            self.STOP_X = orig.column//3
+            self.STOP_Y = orig.line//2
+            self.FLOODEDBORDER = []
         else:
             self.COLORS = self.COLORS[0:color]#random.sample(self.COLORS, k=color)
             self.size = size
@@ -68,8 +72,9 @@ class Board(object):
             self.COLORM = []
             self.resetQTD = 0
             self.GROUPS0 = []
-            self.STOP_X = size//2
-            self.STOP_Y = line//3
+            self.STOP_X = size//3
+            self.STOP_Y = line//2
+            self.FLOODEDBORDER = []
             #self.reset()
 
     # passo 1 - ler o arquivo do mapa e mapear quais os grupos iniciais 
@@ -266,6 +271,7 @@ class Board(object):
 
 
     def move(self, c):
+        self.floodBorder(1)
         self.FC = c
         self.LAST_MOVE = c
         for coor in self.FLOODED:
@@ -298,6 +304,35 @@ class Board(object):
         #remove duplicados
         self.COLORNEIGHBOR = [list(t) for t in set(tuple(row) for row in self.COLORNEIGHBOR)]
             
+#---------------------------------------------
+    def floodBorder(self, i):
+
+        self.FLOODEDBORDER = []
+        # busca vizinhos
+        for coor in self.FLOODED: 
+            x, y = coor
+
+            # Esquerda 1,1 != 1,2
+            if y + i < self.column: 
+                if self.board[x][y] != self.board[x][y+i] and ( (self.board[x][y], (x,y)) not in self.FLOODEDBORDER):
+                        self.FLOODEDBORDER.append([self.board[x][y], (x,y)])
+            # Abaixo 1,1 != 2,1
+            if x + i < self.line:
+                if self.board[x][y] != self.board[x+i][y] and ( (self.board[x][y], (x,y)) not in self.FLOODEDBORDER):
+                        self.FLOODEDBORDER.append([self.board[x][y], (x,y)])
+            # Direita 1,1 != 1, 0
+            if y - i > 0:    
+                if self.board[x][y] != self.board[x][y-i] and ( (self.board[x][y], (x,y)) not in self.FLOODEDBORDER):
+                        self.FLOODEDBORDER.append([self.board[x][y], (x,y)])
+            # Acima 1,1 != 2, 1
+            if x - i > 0:
+                if self.board[x][y] != self.board[x-i][y] and ( (self.board[x][y], (x,y)) not in self.FLOODEDBORDER):
+                        self.FLOODEDBORDER.append([self.board[x][y], (x,y)])
+
+        #remove duplicados
+        self.FLOODEDBORDER = [list(t) for t in set(tuple(row) for row in self.FLOODEDBORDER)]
+  
+
 #---------------------------------------------
     def colorNeighborGROUPS(self, k):
 
@@ -366,7 +401,7 @@ class Board(object):
     def groupFilterFC(self):
         #coresCoord = list(map(lambda x: x if (x[0] == self.FC) else None, self.GROUPS))
         #list(filter(lambda x: x is not None, coresCoord ))
-        groupFilter = [(i, x[1]) for i, x in enumerate(self.GROUPS) if x[0] == self.FC]
+        groupFilter = [(i, x[1]) for i, x in enumerate(self.GROUPS) if x[0] == self.FC or x[0] == self.LAST_MOVE_PEN]
         return groupFilter
     
     # retorna apenas os grupos da cor atual
@@ -522,10 +557,11 @@ class Board(object):
         coorMax = max(enumerate(self.COLORNEIGHBOR), key=lambda x: x[1][1])
         c = coorMax[1][0]
         if (c != self.FC): 
-            child = Board(orig=self) # gera um tabuleiro com o cenário atual
-            child.move(c) # troca a cor atual pela nova cor
-            children.append((child, c)) 
-        return children
+            return c
+            #child = Board(orig=self) # gera um tabuleiro com o cenário atual
+            #child.move(c) # troca a cor atual pela nova cor
+            #children.append((child, c)) 
+        return False
     
     # filho mais próximo do centro
     def childrenCenter(self):
@@ -604,12 +640,9 @@ class Board(object):
         children = []
         self.colorNeighbor(1)
         c = self.colorNearY()
-        #if (c != self.FC): 
-        #    child = Board(orig=self) # gera um tabuleiro com o cenário atual
-        #    child.move(c) # troca a cor atual pela nova cor
-        #    children.append((child, c)) 
-        #return children
-        return c
+        if (c != self.FC): 
+            return c
+        return False
 #---------------------------------------------
 
     # estado objetivo - ou seja, sem grupo de cores
@@ -676,7 +709,7 @@ class Board(object):
     
     def flood2(self):
                         
-        for coor in self.FLOODED:
+        for nf, coor in self.FLOODEDBORDER:
             x, y = coor
             for n, g in enumerate(self.GROUPS): #  percorre o mapeamento inicial de groups
                 if self.FC == g[0]: # a cor inicial é a cor do grupo 
@@ -756,6 +789,7 @@ class Board(object):
         for i in range(self.LAST_MOVE_I, k):
             if self.board[l][i] != self.board[l][i-1]:
                 self.LAST_MOVE_X = l
+                i = i if self.board[l][i] != self.FC else i-1 # para o caso de self.board[30][5] 3 e self.board[30][4] 8 e FC 3
                 self.LAST_MOVE_I = i                
                 return self.board[l][i]
         return False
@@ -786,6 +820,7 @@ class Board(object):
         for i in range(self.LAST_MOVE_I, K):
             if self.board[i][l] != self.board[i-1][l]:
                 self.LAST_MOVE_Y = l
+                i = i if self.board[i][l] != self.FC else i-1
                 self.LAST_MOVE_I = i
                 return self.board[i][l]
         return False  

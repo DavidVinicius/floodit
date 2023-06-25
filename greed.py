@@ -135,8 +135,8 @@ class Greed():
             else:
                 board.Y_DONE = 1
                 board.START_X = board.LAST_MOVE_I
-                board.STOP_X = board.STOP_X//2
-                board.X_DONE = 0
+                board.STOP_X = board.STOP_X//3
+                board.X_DONE = 1 if board.STOP_X == 0 else 0
                 board.LAST_MOVE_I = 1
 
         #if board.XY_DONE == 0 and (board.LAST_MOVE_H != 'C' and (board.LAST_MOVE_H == 'YY' or color == False) ):
@@ -163,12 +163,27 @@ class Greed():
         #         board.XX_DONE = 1
         #         board.LAST_MOVE_I = 1
         
+
+        if board.DY_DONE==0 and color == False:
+            print('D', end=' ')
+            color = board.childrenY()
+            board.DY_DONE=1
+            if color != False:
+                return color
             
+        #if board.MAXCHILDREN_DONE==0 and color == False:
+        #    print('M', end=' ')
+        #    color = board.childrenMax()
+        #    board.MAXCHILDREN_DONE=1
+        #    if color != False:
+        #       return color
         
         if color == False or board.LAST_MOVE_H == 'C':
             print('C', end=' ')
             color = board.childrenNei()
-            board.LAST_MOVE_H = 'C'        
+            board.LAST_MOVE_H = 'C' 
+            board.DY_DONE = 0  
+            board.MAXCHILDREN_DONE=0     
             if color != False:
                 return color
             
